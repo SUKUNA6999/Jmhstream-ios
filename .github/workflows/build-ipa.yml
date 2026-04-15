@@ -1,76 +1,67 @@
 name: Build JMHStream IPA
 
-  on:
-    push:
-      branches: [main]
-    workflow_dispatch:
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
-  jobs:
-    build-ipa:
-      name: Build IPA (unsigned - ready for GBox)
-      runs-on: macos-latest
-      timeout-minutes: 30
+jobs:
+  build-ipa:
+    name: Build IPA (unsigned - ready for GBox)
+    runs-on: macos-latest
+    timeout-minutes: 40
 
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-        - name: Select Xcode version
-          run: |
-            sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-            xcodebuild -version
+      - name: Show Xcode version
+        run: xcodebuild -version
 
-        - name: Install XcodeGen and xcpretty
-          run: |
-            brew install xcodegen
-            gem install xcpretty --no-document
+      - name: Install XcodeGen and xcpretty
+        run: |
+          brew install xcodegen
+          gem install xcpretty --no-document
 
-        - name: Generate Xcode project
-          working-directory: ios
-          run: xcodegen generate --spec project.yml
+      - name: Generate Xcode project
+        working-directory: ios
+        run: xcodegen generate --spec project.yml
 
-        - name: Build Archive (unsigned)
-          working-directory: ios
-          run: |
-            set -o pipefail
-            xcodebuild \
-              -project JMHStream.xcodeproj \
-              -scheme JMHStream \
-              -configuration Release \
-              -sdk iphoneos \
-              -archivePath "$(pwd)/build/JMHStream.xcarchive" \
-              CODE_SIGN_IDENTITY="" \
-              CODE_SIGNING_REQUIRED=NO \
-              CODE_SIGNING_ALLOWED=NO \
-              ENABLE_BITCODE=NO \
-              archive | xcpretty
+      - name: Build Archive (unsigned)
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project JMHStream.xcodeproj \
+            -scheme JMHStream \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$(pwd)/build/JMHStream.xcarchive" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            ENABLE_BITCODE=NO \
+            archive | xcpretty
 
-        - name: Package unsigned IPA (ready for GBox)
-          working-directory: ios
-          run: |
-            mkdir -p build/Payload
-            APP_PATH=$(find build/JMHStream.xcarchive/Products/Applications -name "*.app" | head -1)
-            echo "App found at: $APP_PATH"
-            cp -r "$APP_PATH" build/Payload/
-            cd build
-            zip -r "JMHStream-unsigned.ipa" Payload/
-            echo "IPA size: $(du -sh JMHStream-unsigned.ipa)"
+      - name: Package unsigned IPA (for GBox)
+        working-directory: ios
+        run: |
+          mkdir -p build/Payload
+          APP_PATH=$(find build/JMHStream.xcarchive/Products/Applications -name "*.app" | head -1)
+          echo "App: $APP_PATH"
+          cp -r "$APP_PATH" build/Payload/
+          cd build
+          zip -r JMHStream-unsigned.ipa Payload/
+          echo "IPA created: $(du -sh JMHStream-unsigned.ipa)"
 
-        - name: Upload IPA artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: JMHStream-IPA-unsigned
-            path: ios/build/JMHStream-unsigned.ipa
-            retention-days: 30
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: JMHStream-IPA-unsigned
+          path: ios/build/JMHStream-unsigned.ipa
+          retention-days: 30
 
-        - name: Summary
-          run: |
-            echo "## ✅ Build Complete" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**IPA:** JMHStream-unsigned.ipa" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### How to install on iPhone via GBox:" >> $GITHUB_STEP_SUMMARY
-            echo "1. Download the IPA from the Artifacts section below" >> $GITHUB_STEP_SUMMARY
-            echo "2. Open GBox on your iPhone (gbox.run)" >> $GITHUB_STEP_SUMMARY
-            echo "3. Import the IPA file — GBox will sign and install it" >> $GITHUB_STEP_SUMMARY
-  
+      - name: Build summary
+        run: |
+          echo "## Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "Download the IPA from Artifacts below, then import into GBox on your iPhone." >> $GITHUB_STEP_SUMMARY
