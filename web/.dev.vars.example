@@ -1,0 +1,13 @@
+# Cloudflare Workers local development variables
+# Copy this file to .dev.vars and fill in your values.
+# When running `wrangler dev`, Wrangler reads .dev.vars instead of .env.
+# .dev.vars is listed in .gitignore and should NOT be committed.
+
+DATABASE_URL=postgresql://user:password@host:5432/database
+ADMIN_PASSWORD=your-admin-password-here
+PRIMARY_API_URL=https://summer-band-35d2.athulakumara604.workers.dev
+BACKUP_API_URL=https://apii.freehandyflix.online
+SESSION_SECRET=your-session-secret-here
+TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+TELEGRAM_CHANNEL_ID=@jmhstreamsupport
+SITE_URL=https://jmhstream.online

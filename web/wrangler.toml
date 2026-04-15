@@ -1,0 +1,43 @@
+# Cloudflare Workers + Assets configuration for JMH STREAM
+# Deploy with: npx wrangler deploy
+# Or connect your GitHub repo in the Cloudflare dashboard.
+#
+# Build settings (set in Cloudflare Dashboard > Workers > Build):
+#   Build command : npm run build
+#   Output dir    : dist/public
+#
+# Non-secret variables are set below in [vars].
+#
+# Secret variables must be set via the Cloudflare dashboard or with:
+#   npx wrangler secret put DATABASE_URL
+#   npx wrangler secret put ADMIN_PASSWORD
+#   npx wrangler secret put TELEGRAM_BOT_TOKEN
+#
+# For local development with `wrangler dev`, copy .env values into .dev.vars
+# (see .dev.vars.example for the required format).
+
+name = "jmhggftijb"
+compatibility_date = "2025-03-12"
+compatibility_flags = ["nodejs_compat"]
+main = "dist/worker.js"
+workers_dev = false
+
+[[routes]]
+pattern = "jmhstream.online"
+custom_domain = true
+
+[[routes]]
+pattern = "www.jmhstream.online"
+custom_domain = true
+
+[assets]
+directory = "dist/public"
+
+[vars]
+NODE_ENV = "production"
+# Non-sensitive API URLs — safe to keep in source control.
+# Override with Cloudflare dashboard secrets if you prefer.
+PRIMARY_API_URL = "https://summer-band-35d2.athulakumara604.workers.dev"
+BACKUP_API_URL = "https://apii.freehandyflix.online"
+TELEGRAM_CHANNEL_ID = "@jmhstreamsupport"
+SITE_URL = "https://jmhstream.online"

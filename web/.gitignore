@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.env.local
+*.local
+# Cloudflare Workers local dev secrets (mirrors .env for wrangler dev)
+.dev.vars

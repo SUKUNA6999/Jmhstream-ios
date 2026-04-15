@@ -1,0 +1,51 @@
+User-agent: *
+Allow: /
+Allow: /movies
+Allow: /shows
+Allow: /trending
+Allow: /search
+Allow: /contact
+Disallow: /jmh-admin
+Disallow: /jmh-admin/*
+Disallow: /api/
+Disallow: /api/*
+Disallow: /api/admin/
+Disallow: /api/app/
+Disallow: /api/v1/
+Disallow: /src/
+Disallow: /server/
+Disallow: /shared/
+Disallow: /node_modules/
+Disallow: /.env
+Disallow: /.env.*
+Disallow: /drizzle.config.*
+Disallow: /tsconfig.*
+Disallow: /vite.config.*
+Disallow: /package.json
+Disallow: /package-lock.json
+Disallow: /*.ts$
+Disallow: /*.tsx$
+Disallow: /*.log$
+Disallow: /migrations/
+Disallow: /attached_assets/
+Disallow: /.local/
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+Sitemap: https://jmhstream.online/sitemap.xml
