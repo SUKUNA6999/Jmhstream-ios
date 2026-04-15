@@ -1,0 +1,61 @@
+workflows:
+  ios-unsigned-build:
+    name: JMHStream iOS - Unsigned IPA (GBox ready)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: main
+          include: true
+
+    environment:
+      xcode: latest
+      cocoapods: default
+
+    scripts:
+      - name: Install XcodeGen
+        script: brew install xcodegen
+
+      - name: Generate Xcode project
+        script: |
+          cd ios
+          xcodegen generate --spec project.yml
+
+      - name: Build unsigned IPA
+        script: |
+          cd ios
+          set -o pipefail
+          xcodebuild \
+            -project JMHStream.xcodeproj \
+            -scheme JMHStream \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath $(pwd)/build/JMHStream.xcarchive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            ENABLE_BITCODE=NO \
+            archive
+          # Package as IPA manually (unsigned)
+          mkdir -p build/Payload
+          APP_PATH=$(find build/JMHStream.xcarchive/Products/Applications -name "*.app" | head -1)
+          echo "App found: $APP_PATH"
+          cp -r "$APP_PATH" build/Payload/
+          cd build
+          zip -r JMHStream-unsigned.ipa Payload/
+          echo "Done: $(du -sh JMHStream-unsigned.ipa)"
+
+    artifacts:
+      - ios/build/JMHStream-unsigned.ipa
+
+    publishing:
+      email:
+        recipients:
+          - build@jmhstream.online
+        notify:
+          success: true
+          failure: true
